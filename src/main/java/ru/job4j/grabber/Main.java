@@ -11,7 +11,8 @@ import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
 public class Main {
-    private static final Logger log = Logger.getLogger(Main.class);
+    private static final Logger LOG = Logger.getLogger(Main.class);
+
     public static void main(String[] args) throws InterruptedException {
         var config = new Config();
         config.load("application.properties");
@@ -22,7 +23,7 @@ public class Main {
         var scheduler = new SchedulerManager()) {
             var store = new JdbcStore(connection);
             var post = new Post();
-            post.setTitle( "Super Java Job");
+            post.setTitle("Super Java Job");
             post.setLink("http://example.com/job");
             post.setDescription("Best job for Java devs");
             post.setTime(System.currentTimeMillis());
@@ -34,7 +35,7 @@ public class Main {
                     store);
             Thread.sleep(10000);
         } catch (SQLException e) {
-            log.error("When create a connection", e);
+            LOG.error("When create a connection", e);
         }
     }
 }
