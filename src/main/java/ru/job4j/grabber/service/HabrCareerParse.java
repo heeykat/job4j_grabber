@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HabrCareerParse implements Parse {
-    private static final Logger log = Logger.getLogger(HabrCareerParse.class);
+    private static final Logger LOG = Logger.getLogger(HabrCareerParse.class);
     private static final String SOURCE_LINK = "https://career.habr.com";
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
@@ -42,7 +42,7 @@ public class HabrCareerParse implements Parse {
                 result.add(post);
             });
         } catch (IOException e) {
-            log.error("When load page", e);
+            LOG.error("When load page", e);
         }
         return result;
     }
