@@ -36,6 +36,7 @@ public class HabrCareerParse implements Parse {
                     String vacancyName = titleElement.text();
                     String link = String.format("%s%s", SOURCE_LINK,
                             linkElement.attr("href"));
+                    String description = retrieveDescription(link);
                     DateTimeParser parser = new HabrCareerDateTimeParser();
                     LocalDateTime timestamp = parser.parse(dateTimeElement);
                     long timeMillis = Timestamp.valueOf(timestamp).getTime();
@@ -43,6 +44,7 @@ public class HabrCareerParse implements Parse {
                     post.setTitle(vacancyName);
                     post.setLink(link);
                     post.setTime(timeMillis);
+                    post.setDescription(description);
                     result.add(post);
                 });
             }
@@ -52,12 +54,26 @@ public class HabrCareerParse implements Parse {
         return result;
     }
 
+    private String retrieveDescription(String link) {
+        String result = "";
+        try {
+            var connection = Jsoup.connect(link);
+            var document = connection.get();
+            var rows = document.select(".style-ugc");
+            result = rows.text();
+        } catch (IOException e) {
+            LOG.error("Failed to retrieve description from: " + link, e);
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         var parser = new HabrCareerParse();
         parser.fetch().forEach(
-                p -> System.out.printf("%s %s %s%n",
+                p -> System.out.printf("%s %s %s %s%n",
                         p.getTitle(),
                         p.getLink(),
+                        p.getDescription(),
                         new Timestamp(p.getTime())
                 )
         );
