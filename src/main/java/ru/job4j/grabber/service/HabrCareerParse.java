@@ -7,8 +7,9 @@ import ru.job4j.grabber.utils.DateTimeParser;
 import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,11 @@ public class HabrCareerParse implements Parse {
     private static final String PREFIX = "/vacancies?page=";
     private static final String SUFFIX = "&q=Java%20developer&type=all";
     private static final int PAGES = 5;
+    private final DateTimeParser dateTimeParser;
+
+    public HabrCareerParse(DateTimeParser dateTimeParser) {
+        this.dateTimeParser = dateTimeParser;
+    }
 
     @Override
     public List<Post> fetch() {
@@ -37,13 +43,11 @@ public class HabrCareerParse implements Parse {
                     String link = String.format("%s%s", SOURCE_LINK,
                             linkElement.attr("href"));
                     String description = retrieveDescription(link);
-                    DateTimeParser parser = new HabrCareerDateTimeParser();
-                    LocalDateTime timestamp = parser.parse(dateTimeElement);
-                    long timeMillis = Timestamp.valueOf(timestamp).getTime();
+                    long seconds = dateTimeParser.parse(dateTimeElement).toEpochSecond(ZoneOffset.UTC);
                     var post = new Post();
                     post.setTitle(vacancyName);
                     post.setLink(link);
-                    post.setTime(timeMillis);
+                    post.setTime(seconds);
                     post.setDescription(description);
                     result.add(post);
                 });
@@ -68,13 +72,16 @@ public class HabrCareerParse implements Parse {
     }
 
     public static void main(String[] args) {
-        var parser = new HabrCareerParse();
+        var dateTimeParser = new HabrCareerDateTimeParser();
+        var parser = new HabrCareerParse(dateTimeParser);
         parser.fetch().forEach(
                 p -> System.out.printf("%s %s %s %s%n",
                         p.getTitle(),
                         p.getLink(),
                         p.getDescription(),
-                        new Timestamp(p.getTime())
+                        Instant.ofEpochSecond(p.getTime())
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDateTime()
                 )
         );
     }
