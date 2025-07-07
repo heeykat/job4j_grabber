@@ -2,12 +2,10 @@ package ru.job4j.grabber;
 
 import org.apache.log4j.Logger;
 import ru.job4j.grabber.model.Post;
-import ru.job4j.grabber.service.Config;
-import ru.job4j.grabber.service.SchedulerManager;
-import ru.job4j.grabber.service.SuperJobGrab;
-import ru.job4j.grabber.service.Web;
+import ru.job4j.grabber.service.*;
 import ru.job4j.grabber.stores.JdbcStore;
 import ru.job4j.grabber.stores.Store;
+import ru.job4j.grabber.utils.HabrCareerDateTimeParser;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,6 +27,12 @@ public class Main {
             post.setDescription("Best job for Java devs");
             post.setTime(System.currentTimeMillis());
             store.save(post);
+
+            var dateTimeParser = new HabrCareerDateTimeParser();
+            var parser = new HabrCareerParse(dateTimeParser);
+            parser.fetch().forEach(
+                    store::save
+            );
 
             var scheduler = new SchedulerManager();
             scheduler.init();
